@@ -20,50 +20,40 @@ import androidx.compose.ui.platform.LocalContext
 import coil3.compose.rememberAsyncImagePainter
 
 @Composable
-fun PackageList(context: Context) {
+fun ChooseAppList(context: Context) {
     val packageManager = context.packageManager
 
+    fun getInstalledApplications(): List<Pair<String, String>> {
+        val packageManager = packageManager
+        val appList = mutableListOf<Pair<String, String>>()
 
-    // Get all installed apps (exclude system apps)
-    val installedApps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-
-
-    // Hardcoded list of package names
-    val hardcodedPackages = listOf(
-        "com.google.android.keep",
-        "mark.via.gp",
-        "com.brave.browser",
-        "com.android.chrome"
-    )
-
-    // Get app info and icons for the packages
-    val appsInfo = hardcodedPackages.mapNotNull { packageName ->
-        try {
-            val appInfo = packageManager.getApplicationInfo(packageName, 0)
-            appInfo to packageName // Pair with the app's info and package name
-        } catch (e: PackageManager.NameNotFoundException) {
-            null
+        val installedApplications =
+            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+        for (appInfo in installedApplications) {
+            val appName = packageManager.getApplicationLabel(appInfo).toString()
+            val packageName = appInfo.packageName
+            appList.add(appName to packageName)
         }
+        return appList
     }
 
-    // Display the list of apps
+    val installedApps = getInstalledApplications()
+
     LazyColumn {
-        items(appsInfo) { (appInfo, packageName) ->
-            AppItem(appInfo = appInfo, packageName = packageName)
+        items(installedApps) { app ->
+            AppItem(appName = app.first, packageName = app.second)
         }
     }
 }
 
 @Composable
-fun AppItem(appInfo: ApplicationInfo, packageName: String) {
+fun AppItem(appName: String, packageName: String) {
     val context = LocalContext.current
     val packageManager = context.packageManager
 
-    // Get app icon
-    val iconDrawable: Drawable = packageManager.getApplicationIcon(appInfo)
+    val iconDrawable: Drawable = packageManager.getApplicationIcon(packageName)
     val iconPainter: Painter = rememberAsyncImagePainter(iconDrawable)
 
-    // Layout for each app item
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -85,24 +75,9 @@ fun AppItem(appInfo: ApplicationInfo, packageName: String) {
 
             Spacer(modifier = Modifier.width(2.dp))
 
-            // Display the app name
-            Text(text = packageManager.getApplicationLabel(appInfo).toString())
-
+            Text(text = appName)
             Spacer(modifier = Modifier.weight(1f))
-
-            // Optional: Add a button to launch the app
-            Button(onClick = {
-                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-                launchIntent?.let { context.startActivity(it) }
-            }, modifier = Modifier.height(35.dp)) {
-                Text("Open")
-            }
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = false)
-@Composable
-fun PackageListPreview() {
-    PackageList(context = LocalContext.current)
-}

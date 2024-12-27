@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
             ShareTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(Modifier.padding(innerPadding)) {
-                        Greeting(applicationContext = applicationContext)
+                        AppNavigation(applicationContext)
                     }
                 }
             }
@@ -74,98 +74,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(applicationContext: Context) {
-    val packageManager = applicationContext.packageManager
 
-    var showSelectApp by remember { mutableStateOf(false) }
-
-    fun handleClose() {
-        showSelectApp = false
-    }
-
-
-    fun getInstalledApplications(): List<Pair<String, String>> {
-        val appList = mutableListOf<Pair<String, String>>()
-
-
-        val installedApplications =
-            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-        for (appInfo in installedApplications) {
-            val appName = packageManager.getApplicationLabel(appInfo).toString()
-            val packageName = appInfo.packageName
-            appList.add(appName to packageName)
-        }
-        return appList
-    }
-
-    val installedApps = getInstalledApplications()
-
-    Column(modifier = Modifier.padding(8.dp, 0.dp)) {
-        PackageList(context = applicationContext)
-        Button(onClick = {
-            showSelectApp = true
-        }) {
-            Text("Add")
-        }
-    }
-
-    if (showSelectApp) {
-        AlertDialog(
-            onDismissRequest = { handleClose() },
-            title = { Text(text = "Send To Devices") },
-            text = {
-                Column {
-
-                    Text(
-                        text = "Select an app to share:",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-
-                    LazyColumn {
-                        items(installedApps) { app ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clickable {
-                                    },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                val iconDrawable: Drawable? = try {
-                                    packageManager.getApplicationIcon(app.second)
-                                } catch (e: Exception) {
-                                    null
-                                }
-
-                                if (iconDrawable != null) {
-                                    AsyncImage(
-                                        model = iconDrawable,
-                                        contentDescription = "App Icon for ${app.first}",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                } else {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.sym_def_app_icon),
-                                        contentDescription = "Fallback App Icon",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = app.first)
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { handleClose() }
-                ) {
-                    Text("Close")
-                }
-            }
-        )
-    }
 
 }
 
