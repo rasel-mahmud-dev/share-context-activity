@@ -72,4 +72,5 @@ dependencies {
 
 
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+    implementation("com.google.code.gson:gson:2.11.0")
 }

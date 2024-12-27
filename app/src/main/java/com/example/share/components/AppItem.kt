@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
 @Composable
-fun AppItem(app: Pair<String, String>, onPress: (String) -> Unit, packageManager: PackageManager) {
+fun AppItem(modifier: Modifier, app: Pair<String, String>, onPress: (String) -> Unit, packageManager: PackageManager) {
     Row(
-        modifier = Modifier
+        modifier
             .padding(0.dp)
             .clickable {
                 onPress(app.second)

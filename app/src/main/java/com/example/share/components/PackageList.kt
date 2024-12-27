@@ -3,6 +3,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import android.content.Context
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.example.share.State.AppState
 import com.example.share.components.AppItem
 
@@ -24,7 +27,7 @@ fun PackageList(context: Context) {
 
     LazyColumn {
         items(appsInfo) { app ->
-            AppItem(app, onPress = {}, packageManager)
+            AppItem(modifier = Modifier.padding(8.dp), app, onPress = {}, packageManager)
         }
     }
 }

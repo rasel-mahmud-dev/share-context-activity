@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.share.State.AppState
 import com.example.share.components.AppItem
+import com.example.share.utils.LocalStorage
 
 @Composable
 fun ChooseAppScreen(
@@ -50,6 +51,8 @@ fun ChooseAppScreen(
         } else {
             AppState.insert(packageName)
         }
+
+        AppState.saveData(applicationContext)
     }
 
 
@@ -140,7 +143,12 @@ fun ChooseAppScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
-                    AppItem(app, onPress = { handleAddNew(it) }, packageManager)
+                    AppItem(
+                        modifier = Modifier,
+                        app,
+                        onPress = { handleAddNew(it) },
+                        packageManager
+                    )
 
 
                     Switch(
