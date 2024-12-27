@@ -31,7 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import com.example.share.State.AppViewModel
 
 
 data class NewClip(
@@ -84,23 +86,25 @@ fun MyAppUI(link: String?) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(true) }
     val packageManager = context.packageManager
+    val appViewModel: AppViewModel = viewModel()
 
+    val selectedApp = appViewModel.selectedApp
 
     fun handleClose() {
         showDialog = false
         (context as Activity).finish()
     }
 
+//
+//    val hardcodedPackages = listOf(
+//        "com.google.android.keep",
+//        "mark.via.gp",
+//        "com.brave.browser",
+//        "com.android.chrome"
+//    )
 
-    val hardcodedPackages = listOf(
-        "com.google.android.keep",
-        "mark.via.gp",
-        "com.brave.browser",
-        "com.android.chrome"
-    )
 
-
-    val shareableApps = hardcodedPackages.mapNotNull { packageName ->
+    val shareableApps = selectedApp.mapNotNull { packageName ->
         try {
             val appInfo = packageManager.getApplicationInfo(packageName, 0)
             Log.d("AppFound", "App found: $packageName")

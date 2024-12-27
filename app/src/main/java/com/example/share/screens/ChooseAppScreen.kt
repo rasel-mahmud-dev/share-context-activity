@@ -1,15 +1,10 @@
 package com.example.share.screens
 
 
-import android.R
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -36,20 +30,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import coil3.compose.AsyncImage
 import com.example.share.State.AppViewModel
+import com.example.share.components.AppItem
 
 @Composable
-fun ChooseAppScreen(applicationContext: Context, navController: NavHostController) {
+fun ChooseAppScreen(
+    applicationContext: Context,
+    navController: NavHostController,
+    appViewModel: AppViewModel
+) {
     val packageManager = applicationContext.packageManager
-
-    val appViewModel: AppViewModel = viewModel()
 
     fun handleAddNew(packageName: String) {
         if (appViewModel.isExists(packageName)) {
@@ -147,37 +141,8 @@ fun ChooseAppScreen(applicationContext: Context, navController: NavHostControlle
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
-                    Row(
-                        modifier = Modifier
-                            .padding(0.dp)
-                            .clickable {
-                                handleAddNew(app.second)
-                            },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    AppItem(app, onPress = { handleAddNew(it) }, packageManager)
 
-                        val iconDrawable: Drawable? = try {
-                            packageManager.getApplicationIcon(app.second)
-                        } catch (e: Exception) {
-                            null
-                        }
-
-                        if (iconDrawable != null) {
-                            AsyncImage(
-                                model = iconDrawable,
-                                contentDescription = "App Icon for ${app.first}",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        } else {
-                            Image(
-                                painter = painterResource(id = R.drawable.sym_def_app_icon),
-                                contentDescription = "Fallback App Icon",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = app.first)
-                    }
 
                     Switch(
                         checked = appViewModel.isExists(app.second),

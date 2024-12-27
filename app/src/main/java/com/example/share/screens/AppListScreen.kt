@@ -15,11 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.share.State.AppViewModel
 
 @Composable
-fun AppListScreen(applicationContext: Context, navHost: NavHostController){
+fun AppListScreen(applicationContext: Context, navHost: NavHostController, appViewModel: AppViewModel){
     Column(modifier = Modifier.padding(8.dp, 0.dp)) {
-        PackageList(context = applicationContext)
+        PackageList(context = applicationContext, appViewModel)
         Button(onClick = {
             navHost.navigate("choose-app")
         }) {
