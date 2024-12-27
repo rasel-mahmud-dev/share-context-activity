@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import com.example.share.State.AppState
 import com.example.share.State.AppViewModel
 
 
@@ -88,7 +89,7 @@ fun MyAppUI(link: String?) {
     val packageManager = context.packageManager
     val appViewModel: AppViewModel = viewModel()
 
-    val selectedApp = appViewModel.selectedApp
+    val selectedApp = AppState.selectedApp
 
     fun handleClose() {
         showDialog = false

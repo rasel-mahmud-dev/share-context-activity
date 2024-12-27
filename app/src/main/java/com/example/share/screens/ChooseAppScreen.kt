@@ -34,22 +34,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.share.State.AppViewModel
+import com.example.share.State.AppState
 import com.example.share.components.AppItem
 
 @Composable
 fun ChooseAppScreen(
     applicationContext: Context,
     navController: NavHostController,
-    appViewModel: AppViewModel
 ) {
     val packageManager = applicationContext.packageManager
 
     fun handleAddNew(packageName: String) {
-        if (appViewModel.isExists(packageName)) {
-            appViewModel.remove(packageName)
+        if (AppState.isExists(packageName)) {
+            AppState.remove(packageName)
         } else {
-            appViewModel.insert(packageName)
+            AppState.insert(packageName)
         }
     }
 
@@ -145,7 +144,7 @@ fun ChooseAppScreen(
 
 
                     Switch(
-                        checked = appViewModel.isExists(app.second),
+                        checked = AppState.isExists(app.second),
                         onCheckedChange = { handleAddNew(app.second) },
                         modifier = Modifier
                             .scale(0.7f)

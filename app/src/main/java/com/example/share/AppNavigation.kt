@@ -13,18 +13,17 @@ import com.example.share.screens.ChooseAppScreen
 
 @Composable
 fun AppNavigation(context: Context) {
-    val navController = rememberNavController() // NavController for navigation
-    val appViewModel: AppViewModel = viewModel()
+    val navController = rememberNavController()
 
     NavHost(
         navController = navController,
         startDestination = "home"
     ) {
         composable("home") {
-            AppListScreen(context, navController, appViewModel)
+            AppListScreen(context, navController)
         }
         composable("choose-app") {
-            ChooseAppScreen(context, navController, appViewModel)
+            ChooseAppScreen(context, navController)
         }
         composable("appDetails/{appName}") { backStackEntry ->
             val appName = backStackEntry.arguments?.getString("appName")

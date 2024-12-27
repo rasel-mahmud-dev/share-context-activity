@@ -3,14 +3,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import android.content.Context
-import com.example.share.State.AppViewModel
+import com.example.share.State.AppState
 import com.example.share.components.AppItem
 
 @Composable
-fun PackageList(context: Context, appViewModel: AppViewModel) {
+fun PackageList(context: Context) {
     val packageManager = context.packageManager
 
-    val selectedApp = appViewModel.selectedApp
+    val selectedApp = AppState.selectedApp
 
     val appsInfo = selectedApp.mapNotNull { packageName ->
         try {
@@ -21,7 +21,6 @@ fun PackageList(context: Context, appViewModel: AppViewModel) {
             null
         }
     }
-
 
     LazyColumn {
         items(appsInfo) { app ->
