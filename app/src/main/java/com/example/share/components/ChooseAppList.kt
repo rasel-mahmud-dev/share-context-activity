@@ -18,6 +18,7 @@ import android.content.pm.ApplicationInfo
 import androidx.compose.material3.Button
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.rememberAsyncImagePainter
+import com.example.share.State.AppViewModel
 
 @Composable
 fun ChooseAppList(context: Context) {
