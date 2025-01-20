@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -29,11 +30,14 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.ServerSocket
+import java.net.Socket
+import java.net.UnknownHostException
 import java.util.Date
 import kotlin.concurrent.thread
 
 
 class MainActivity : ComponentActivity() {
+
 
     private val port = 12345
     private var serverSocket: ServerSocket? = null
@@ -86,13 +90,29 @@ class MainActivity : ComponentActivity() {
                         }
 
 
+                        Row  {
+
+                            Button(onClick = {
+                                startConnectionFromServer()
+                            }) {
+                                Text("Start")
+                            }
+
+                            Button(onClick = {
+                                disconnectFromServer()
+                            }) {
+                                Text("Disconnect")
+                            }
+                        }
+
+
                         AppNavigation(applicationContext)
                     }
                 }
             }
         }
 
-        startTcpServer()
+//        startTcpClient()
     }
 
     private fun getDeviceInfo(): String {
@@ -173,10 +193,10 @@ class MainActivity : ComponentActivity() {
                                     val y = parts[1].toIntOrNull()
                                         ?: 0  // Default to 0 if parsing fails
 
-                                    if(message.startsWith("cli") ){
+                                    if (message.startsWith("cli")) {
                                         sendMouseClickEvent(x, y)
                                     }
-                                    if(message.startsWith("cur") ){
+                                    if (message.startsWith("cur")) {
                                         sendMouseMoveEvent(x, y)
                                     }
 
@@ -204,6 +224,70 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun startTcpClient() {
+        thread {
+            var socket: Socket? = null
+            while (true) {
+                try {
+                    val serverAddress = "192.168.0.148"
+                    val serverPort = 12345
+
+                    socket = Socket(serverAddress, serverPort)
+                    Log.d("TCPClient", "Connected to server at $serverAddress:$serverPort")
+
+                    val inputStream = BufferedReader(InputStreamReader(socket.getInputStream()))
+                    val outputStream = OutputStreamWriter(socket.getOutputStream())
+
+                    val deviceInfo = inputStream.readLine()
+                    Log.d("TCPClient", "Device info received from server: $deviceInfo")
+
+                    while (socket.isConnected) {
+                        val serverResponse = inputStream.readLine()
+                        if (serverResponse != null) {
+                            Log.d("TCPClient", "Received from server: $serverResponse")
+                        } else {
+                            Log.d("TCPClient", "Server closed connection, retrying...")
+                            break
+                        }
+                    }
+
+                    socket.close()
+                    Log.d("TCPClient", "Connection closed by server.")
+                    retryConnection()
+
+                } catch (e: UnknownHostException) {
+                    Log.e("TCPClient", "Unknown host: ${e.message}")
+                    retryConnection()
+                } catch (e: Exception) {
+                    Log.e("TCPClient", "Error: ${e.message}")
+                    retryConnection()
+                }
+            }
+        }
+    }
+
+    private fun retryConnection() {
+        try {
+            Log.d("TCPClient", "Retrying connection in 5 seconds...")
+            Thread.sleep(5000)
+        } catch (e: InterruptedException) {
+            Log.e("TCPClient", "Error while waiting to retry: ${e.message}")
+        }
+    }
+
+    private fun disconnectFromServer() {
+          val serviceIntent = Intent(this, TcpClientService::class.java)
+
+        stopService(serviceIntent)
+    }
+
+    private fun startConnectionFromServer() {
+          val serviceIntent = Intent(this, TcpClientService::class.java)
+
+        startService(serviceIntent)
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()

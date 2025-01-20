@@ -1,61 +1,53 @@
-
+const readline = require('readline');
 const net = require('net');
 const port = 12345;
-//const host = '192.168.0.100';
-const host = '192.168.0.103';
+const host = '0.0.0.0';
 
+let count = 0;
+let currentClientSocket = null;
 
-let count = 0
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
+const server = net.createServer((socket) => {
+    console.log('New client connected.');
 
-// Function to create the client and handle communication
-function createClient() {
-  const client = new net.Socket();
+    if (currentClientSocket !== null) {
+        console.log('Disconnecting previous client.');
+        currentClientSocket.end();
+    }
 
-  // Try to connect to the server
-  client.connect(port, host, () => {
-    console.log('Connected to server');
+    currentClientSocket = socket;
 
-    setInterval(()=>{
-         count++
-    client.write(`cur:${count},${count}\n`);
-    }, 10)
+    socket.on('data', (data) => {
+        const msg = data.toString();
+        console.log('Received from client: ' + msg);
+        socket.write(`Received: ${msg} \n`);
+    });
 
-//    setInterval(()=>{
-//        count++
-//        client.write(`cli:${count},${count}\n`);
-//    }, 10000)
+    socket.on('end', () => {
+        console.log('Client disconnected');
+        currentClientSocket = null;
+    });
 
-//     setInterval(()=>{
-//            client.write("10\n");
-//        }, 5000)
+    socket.on('error', (err) => {
+        console.error('Error: ' + err.message);
+    });
+});
 
+server.listen(port, host, () => {
+    console.log(`Server listening on ${host}:${port}`);
+});
 
-  });
+server.on('error', (err) => {
+    console.error('Server error: ' + err.message);
+});
 
-  client.on('data', (data) => {
-    const msg = data.toString()
-    console.log('Received from server: ' + msg );
-  });
-
-  // Handle connection error
-  client.on('error', (err) => {
-    console.error('Connection error: ' + err.message);
-    client.destroy(); // Destroy the client after an error
-  });
-
-  // Handle the client being closed or disconnected
-  client.on('close', () => {
-    console.log('Connection closed. Reconnecting...');
-    setTimeout(createClient, 5000); // Try to reconnect after 5 seconds
-  });
-
-  // Handle client connection timeout
-  client.on('timeout', () => {
-    console.log('Connection timed out. Reconnecting...');
-    client.destroy(); // Destroy and try to reconnect
-  });
-}
-
-// Start the client
-createClient();
+rl.on('line', (input) => {
+    if (currentClientSocket) {
+        console.log(`Sending to client: ${input}`);
+        currentClientSocket.write(input + '\n');
+    }
+});

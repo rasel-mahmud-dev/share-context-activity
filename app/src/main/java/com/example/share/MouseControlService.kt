@@ -29,7 +29,7 @@ class MouseControlService : AccessibilityService() {
             if (intent?.action == "com.example.share.CLICK_MOUSE") {
                 val x = intent.getIntExtra("x", -1)
                 val y = intent.getIntExtra("y", -1)
-                Log.d("MouseControlService", "Received coordinates: x=$x, y=$y")
+                Log.d("MouseControlService", "Received click coordinates: x=$x, y=$y")
                 simulateTap2(x, y)
 //                moveMousePointer(x, y)
             }
@@ -91,7 +91,10 @@ class MouseControlService : AccessibilityService() {
         super.onServiceConnected()
         Log.d("MouseControlService", "Service connected")
         setupPointer()
-        val filter = IntentFilter("com.example.share.MOVE_MOUSE")
+        val filter = IntentFilter().apply {
+            addAction("com.example.share.CLICK_MOUSE")
+            addAction("com.example.share.MOVE_MOUSE")
+        }
         registerReceiver(mouseReceiver, filter, RECEIVER_EXPORTED)
     }
 
