@@ -22,6 +22,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +61,7 @@ class ShareActivity<ResolveInfo> : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handleIncomingIntent(intent)
+
         Log.d("on-create", "oncreate")
         setContent {
             MyAppUI(receivedLink)
@@ -87,7 +89,11 @@ fun MyAppUI(link: String?) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(true) }
     val packageManager = context.packageManager
-    val appViewModel: AppViewModel = viewModel()
+
+    LaunchedEffect(Unit) {
+        AppState.loadData(context)
+    }
+
 
     val selectedApp = AppState.selectedApp
 

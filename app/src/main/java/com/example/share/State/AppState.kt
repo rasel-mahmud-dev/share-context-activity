@@ -12,7 +12,8 @@ object AppState {
             "com.google.android.keep",
             "mark.via.gp",
             "com.brave.browser",
-            "com.android.chrome"
+            "com.android.chrome",
+            "com.snaptik.tt.downloader.nologo.nowatermark"
         )
     )
         private set
@@ -33,7 +34,9 @@ object AppState {
     fun loadData(context: Context) {
         val selectedApwp: List<String> =
             LocalStorage.getData(context, "selectedApp", emptyList())
-        selectedApp = selectedApwp
+        if(selectedApwp.isNotEmpty()) {
+            selectedApp = selectedApwp
+        }
     }
 
     fun saveData(context: Context) {

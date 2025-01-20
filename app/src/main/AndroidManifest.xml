@@ -2,10 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission
+        android:name="android.permission.BIND_INPUT_METHOD"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -17,19 +26,53 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Share"
         tools:targetApi="31">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Share">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+
+
+        <service
+            android:name=".MouseControlService"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
 
+            <!-- Metadata for accessibility service -->
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+
+        <!-- Registering the BroadcastReceiver to receive the broadcast -->
+        <!--        <receiver-->
+        <!--            android:name=".MouseControlService"-->
+        <!--            android:exported="true">-->
+        <!--            <intent-filter>-->
+        <!--                <action android:name="com.example.share.MOVE_MOUSE" />-->
+        <!--            </intent-filter>-->
+        <!--        </receiver>-->
+
+
+        <!-- MainActivity -->
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:resizeableActivity="false"
+            android:theme="@style/Theme.Share"
+            tools:ignore="DiscouragedApi">
+            <meta-data
+                android:name="android.max_aspect"
+                android:value="0.33" /> <!-- Forces 4:3 aspect ratio -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
 
+        <!-- ShareActivity -->
         <activity
             android:name=".ShareActivity"
             android:exported="true"
@@ -48,19 +91,44 @@
             </intent-filter>
         </activity>
 
-<!--        <activity-->
-<!--            android:name="com.example.share.ShareActivity"-->
-<!--            android:configChanges="keyboardHidden|orientation|screenSize"-->
-<!--            android:exported="true"-->
-<!--            android:label="Rasel"-->
-<!--            android:launchMode="singleTask"-->
-<!--            android:theme="@style/DialogTheme">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.PROCESS_TEXT" />-->
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--                <data android:mimeType="text/plain" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+        <!-- CustomKeyboardService -->
+        <service
+            android:name=".CustomKeyboardService"
+            android:exported="true"
+            android:label="Custom Keyboard Service"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.inputmethod.InputMethod" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.view.inputmethod"
+                android:resource="@xml/method" />
+        </service>
+
+
+        <receiver
+            android:name=".AirPlaneModeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE" />
+                <action android:name="android.intent.action.ACTION_AIRPLANE_MODE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+
+        <service
+            android:name=".AirplaneModeService"
+            android:exported="true"
+            android:permission="android.permission.FOREGROUND_SERVICE"
+            android:foregroundServiceType="connectedDevice"
+            tools:ignore="ForegroundServicePermission">
+            <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE" />
+            </intent-filter>
+        </service>
+
+
 
     </application>
 
