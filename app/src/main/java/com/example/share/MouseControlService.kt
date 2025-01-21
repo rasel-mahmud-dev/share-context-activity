@@ -2,6 +2,7 @@ package com.example.share
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.annotation.SuppressLint
 import android.view.accessibility.AccessibilityEvent
 import android.util.Log
 import android.content.BroadcastReceiver
@@ -25,29 +26,32 @@ class MouseControlService : AccessibilityService() {
 
 
     private val mouseReceiver = object : BroadcastReceiver() {
+        @SuppressLint("DefaultLocale")
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == "com.example.share.CLICK_MOUSE") {
-                val x = intent.getIntExtra("x", -1)
-                val y = intent.getIntExtra("y", -1)
+                val x = intent.getFloatExtra("x", 0F)
+                val y = intent.getFloatExtra("y", 0F)
                 Log.d("MouseControlService", "Received click coordinates: x=$x, y=$y")
-                simulateTap2(x, y)
+
+                simulateTap2(x.toInt() - 5, y.toInt() - 5)
+
 //                moveMousePointer(x, y)
             }
 
             if (intent?.action == "com.example.share.MOVE_MOUSE") {
-                val x = intent.getIntExtra("x", -1)
-                val y = intent.getIntExtra("y", -1)
+                val x = intent.getFloatExtra("x", 0F)
+                val y = intent.getFloatExtra("y", 0F)
                 Log.d("MouseControlService", "Received move coordinates: x=$x, y=$y")
                 moveMousePointer(x, y)
             }
         }
     }
 
-    private fun moveMousePointer(x: Int, y: Int) {
+    private fun moveMousePointer(x: Float, y: Float) {
         mousePointer?.let { pointer ->
             val layoutParams = pointer.layoutParams as WindowManager.LayoutParams
-            layoutParams.x = x
-            layoutParams.y = y
+            layoutParams.x = x.toInt()
+            layoutParams.y = y.toInt()
             mainHandler.post { windowManager.updateViewLayout(pointer, layoutParams) }
         }
     }
@@ -56,12 +60,14 @@ class MouseControlService : AccessibilityService() {
     fun simulateTap2(x: Int, y: Int) {
         // Ensure any ongoing gestures are completed
         val path = Path().apply {
-            moveTo(x.toFloat(), y.toFloat()) // Coordinates of the tap
+            moveTo(x.toFloat(), y.toFloat())
         }
+
+        Log.d("adasd", "$x, $y")
 
         // Create a GestureDescription
         val gesture = GestureDescription.Builder().apply {
-            addStroke(GestureDescription.StrokeDescription(path, 0, 100)) // Duration: 100ms
+            addStroke(GestureDescription.StrokeDescription(path, 0, 10)) // Duration: 100ms
         }.build()
 
         // Dispatch the gesture
@@ -100,7 +106,6 @@ class MouseControlService : AccessibilityService() {
 
 
     override fun onUnbind(intent: Intent?): Boolean {
-        // Unregister the receiver when the service is unbound
         unregisterReceiver(mouseReceiver)
         Log.d("MouseControlService", "Service onUnbind and receiver unregistered")
         return super.onUnbind(intent)
@@ -108,7 +113,6 @@ class MouseControlService : AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Unregister the BroadcastReceiver to prevent leaks
         unregisterReceiver(mouseReceiver)
         removePointer()
         Log.d("MouseControlService", "Service destroyed and receiver unregistered")
@@ -117,9 +121,10 @@ class MouseControlService : AccessibilityService() {
     private fun setupPointer() {
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-        // Inflate the floating mouse pointer layout
+        // Inflate the mouse pointer layout
         mousePointer = LayoutInflater.from(this).inflate(R.layout.mouse_pointer, null)
 
+        // Define layout parameters for the mouse pointer
         val layoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -128,11 +133,16 @@ class MouseControlService : AccessibilityService() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 0
-            y = 0
+            x = 0 // Horizontal position: 2 pixels from the left
+            y = 0 // Vertical position: 20 pixels from the top
         }
 
-        windowManager.addView(mousePointer, layoutParams)
+        // Add the pointer view to the WindowManager
+        try {
+            windowManager.addView(mousePointer, layoutParams)
+        } catch (e: Exception) {
+            Log.e("PointerSetup", "Error adding pointer to WindowManager: ${e.message}")
+        }
     }
 
     private fun removePointer() {

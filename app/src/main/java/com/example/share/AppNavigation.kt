@@ -6,9 +6,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.share.State.AppViewModel
-import com.example.share.screens.AppListScreen
 import com.example.share.screens.ChooseAppScreen
+import com.example.share.screens.HomeScreen
 
 
 @Composable
@@ -20,7 +19,7 @@ fun AppNavigation(context: Context) {
         startDestination = "home"
     ) {
         composable("home") {
-            AppListScreen(context, navController)
+            HomeScreen(context, navController)
         }
         composable("choose-app") {
             ChooseAppScreen(context, navController)

@@ -1,6 +1,6 @@
 const readline = require('readline');
 const net = require('net');
-const port = 12345;
+const port = 12346;
 const host = '0.0.0.0';
 
 let count = 0;

@@ -3,9 +3,12 @@ package com.example.share
 import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -19,7 +22,13 @@ class TcpClientService : Service() {
     private var socket: Socket? = null
     private var isRunning = true
 
-    fun sendMouseClickEvent(x: Int, y: Int) {
+    private fun showToast(message: String) {
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun sendMouseClickEvent(x: Float, y: Float) {
         val intent = Intent("com.example.share.CLICK_MOUSE").apply {
             putExtra("x", x)
             putExtra("y", y)
@@ -28,7 +37,7 @@ class TcpClientService : Service() {
         sendBroadcast(intent)
     }
 
-    fun sendMouseMoveEvent(x: Int, y: Int) {
+    fun sendMouseMoveEvent(x: Float, y: Float) {
         val intent = Intent("com.example.share.MOVE_MOUSE").apply {
             putExtra("x", x)
             putExtra("y", y)
@@ -39,9 +48,11 @@ class TcpClientService : Service() {
 
     @SuppressLint("HardwareIds")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val ipv4Address = intent?.getStringExtra("ipv4Address") ?: throw Error("IPV4 required...")
+
         deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         Log.d("TCPClientService", "Device ID: $deviceId")
-        startTcpClient()
+        startTcpClient(ipv4Address)
         return START_STICKY
     }
 
@@ -49,24 +60,17 @@ class TcpClientService : Service() {
         return null
     }
 
-    private fun startTcpClient() {
+    private fun startTcpClient(ipAddress: String) {
         thread {
 
             try {
-                // Check if there's an existing socket connection and close it before proceeding
-                if (socket != null && !socket!!.isClosed) {
-                    Log.d(
-                        "TCPClientService",
-                        "Closing existing connection before establishing a new one."
-                    )
-                    return@thread
-                }
 
-                val serverAddress = "192.168.0.148"
-                val serverPort = 12345
 
-                socket = Socket(serverAddress, serverPort)
-                Log.d("TCPClientService", "Connected to server at $serverAddress:$serverPort")
+                val serverPort = 12346
+
+                socket = Socket(ipAddress, serverPort)
+                Log.d("TCPClientService", "Connected to server at $ipAddress:$serverPort")
+                showToast("Connected to server at $ipAddress:$serverPort")
 
                 val inputStream = BufferedReader(InputStreamReader(socket?.getInputStream()))
                 val outputStream = OutputStreamWriter(socket?.getOutputStream())
@@ -79,7 +83,7 @@ class TcpClientService : Service() {
                 val deviceInfo = inputStream.readLine()
                 Log.d("TCPClientService", "Device info received from server: $deviceInfo")
 
-                while (isRunning && socket?.isConnected == true) {
+                while (socket?.isConnected == true) {
                     val message = inputStream.readLine()
                     if (message != null) {
                         Log.d("TCPClientService", "Received from server: $message")
@@ -87,14 +91,14 @@ class TcpClientService : Service() {
                         if (message.startsWith("cur") || message.startsWith("cli")) {
                             val coordinates = message.substring(4)
                             val parts = coordinates.split(",")
-                            val x = parts[0].toIntOrNull() ?: 0
-                            val y = parts[1].toIntOrNull() ?: 0
+                            val x = parts[0].toFloatOrNull() ?: 0.0
+                            val y = parts[1].toFloatOrNull() ?: 0.0
 
                             if (message.startsWith("cli")) {
-                                sendMouseClickEvent(x, y)
+                                sendMouseClickEvent(x.toFloat(), y.toFloat())
                             }
                             if (message.startsWith("cur")) {
-                                sendMouseMoveEvent(x, y)
+                                sendMouseMoveEvent(x.toFloat(), y.toFloat())
                             }
 
                         }
@@ -105,16 +109,20 @@ class TcpClientService : Service() {
                         break
                     }
                 }
-
+//                retryConnection()
                 socket?.close()
+                showToast("Unknown host: ")
                 Log.d("TCPClientService", "Connection closed by server.")
 
             } catch (e: UnknownHostException) {
+                showToast("Unknown host: ${e.message}")
                 Log.e("TCPClientService", "Unknown host: ${e.message}")
-                retryConnection()
+//                retryConnection()
             } catch (e: Exception) {
+                showToast("Error: ${e.message}")
+
                 Log.e("TCPClientService", "Error: ${e.message}")
-                retryConnection()
+//                retryConnection()
 
             }
         }
@@ -124,7 +132,7 @@ class TcpClientService : Service() {
         try {
             Log.d("TCPClientService", "Retrying connection in 5 seconds...")
             Thread.sleep(5000) // Wait for 5 seconds before retrying
-            startTcpClient()
+//            startTcpClient()
         } catch (e: InterruptedException) {
             Log.e("TCPClientService", "Error while waiting to retry: ${e.message}")
         }
