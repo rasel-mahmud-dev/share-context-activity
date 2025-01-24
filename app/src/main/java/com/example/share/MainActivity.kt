@@ -1,5 +1,6 @@
 package com.example.share
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -19,10 +20,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.share.State.AppState
+import com.example.share.screens.HomeScreen
+import com.example.share.screens.MainApp
 import com.example.share.ui.theme.ShareTheme
 
 class MainActivity : ComponentActivity() {
 
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -36,10 +40,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ShareTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Log.d("innerPadding", innerPadding.toString())
+                Scaffold(modifier = Modifier.fillMaxSize()) {
                     Column(Modifier.padding(0.dp)) {
-                        AppNavigation(applicationContext)
+                        MainApp(applicationContext)
                     }
                 }
             }
