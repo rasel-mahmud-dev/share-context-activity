@@ -74,4 +74,8 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-compose:3.0.4")
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.6")
     implementation("com.google.code.gson:gson:2.11.0")
+    implementation("androidx.sqlite:sqlite:2.4.0")
+    implementation("com.google.accompanist:accompanist-coil:0.15.0")
+
+
 }

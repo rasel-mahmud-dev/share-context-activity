@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.example.share.screens.MouseCursor
 
 @Composable
-fun CursorItem(cursor: MouseCursor, color: Color) {
+fun CursorItem(cursor: MouseCursor, selectedItem: Int, color: Color, onClickCursor: (url: Int)->Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
@@ -36,10 +36,10 @@ fun CursorItem(cursor: MouseCursor, color: Color) {
                 shape = RoundedCornerShape(12.dp)
             )
             .clickable(
-                onClick = { }, indication = null, interactionSource = interactionSource
+                onClick = { cursor.defaultIconRes?.let { onClickCursor(it) } }, indication = null, interactionSource = interactionSource
             )
             .background(
-                if (isPressed) color.copy(alpha = 0.2f) else Color.Transparent,
+                if (isPressed || selectedItem == cursor.defaultIconRes ) color.copy(alpha = 0.2f) else Color.Transparent,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(16.dp), verticalAlignment = Alignment.CenterVertically

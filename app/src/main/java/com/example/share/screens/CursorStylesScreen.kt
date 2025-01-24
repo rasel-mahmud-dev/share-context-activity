@@ -2,6 +2,7 @@ package com.example.share.screens
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -20,9 +21,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.share.R
 import com.example.share.components.CursorItem
+import com.example.share.components.PrimaryButton
+import com.example.share.database.StateDatabaseHelper
 import com.example.share.ui.theme.PoppinsFontFamily
 import com.example.share.ui.theme.cursorColors
-import com.example.share.ui.theme.fontAwesome
 
 
 data class MouseCursor(
@@ -35,11 +37,19 @@ data class ColorEntry(val name: String, val value: Color)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CursorStylesScreen(applicationContext: Context, navHostController: NavHostController) {
+
+
+    val db = StateDatabaseHelper.getInstance(applicationContext)
+    val cursor = db.getState("cursor")
+
+    val cursorInt = cursor?.toInt() ?: 0
+
     var mouseCursors by remember {
         mutableStateOf(
             listOf(
                 MouseCursor("Default Pointer", defaultIconRes = R.drawable.ic_mouse_pointer),
-                MouseCursor("Hand Pointer", defaultIconRes = R.drawable.ic_mouse_circle),
+                MouseCursor("Hand Pointer", defaultIconRes = R.drawable.ic_mac_mouse_pointer),
+                MouseCursor("Hand Pointerj", defaultIconRes = R.drawable.ic_mac_mouse_default_pointer),
             )
         )
     }
@@ -90,34 +100,9 @@ fun CursorStylesScreen(applicationContext: Context, navHostController: NavHostCo
                     color = Color.White,
                 )
 
-                Button(
-                    modifier = Modifier,
-                    onClick = {
-                        launcher.launch("image/png")
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF53308F)),
-                    contentPadding = PaddingValues(20.dp, 16.dp)
-                ) {
+                PrimaryButton(label = "Upload Cursor", icon = "\uf0ee", onClick = {})
 
-                    Text(
-                        modifier = Modifier,
-                        text = "\uf0ee",
-                        fontFamily = fontAwesome,
-                        fontSize = 20.sp,
-                        color = Color.White
-                    )
-
-                    Spacer(Modifier.width(8.dp))
-
-                    Text(
-                        fontFamily = PoppinsFontFamily,
-                        text = "Upload Cursor",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
             }
-
 
             mouseCursors.forEach { cursor ->
                 Column(Modifier.padding(0.dp, 12.dp)) {
@@ -139,7 +124,9 @@ fun CursorStylesScreen(applicationContext: Context, navHostController: NavHostCo
                     ) {
 
                         cursorColors.forEach { color ->
-                            CursorItem(cursor = cursor, color.value)
+                            CursorItem(cursor = cursor, selectedItem=cursorInt, color = color.value, onClickCursor={
+                                db.saveState("cursor", it.toString())
+                            })
                         }
                     }
                 }

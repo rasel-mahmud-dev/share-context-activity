@@ -18,7 +18,7 @@ fun AppNavigation(context: Context, navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = "cursor-styles"
+        startDestination = "pc-connection"
     ) {
         composable("home") {
             HomeScreen(context, navController)
